@@ -22,6 +22,8 @@ export interface ModelConfig {
   maxTokens: number;
   supportsStreaming: boolean;
   strengths: string[];
+  apiUrl: string;
+  apiKey?: string;
 }
 
 export const DEFAULT_MODELS: ModelConfig[] = [
@@ -34,7 +36,9 @@ export const DEFAULT_MODELS: ModelConfig[] = [
     costPer1kOutput: 0.03,
     maxTokens: 128000,
     supportsStreaming: true,
-    strengths: ['complex reasoning', 'code generation', 'analysis']
+    strengths: ['complex reasoning', 'code generation', 'analysis'],
+    apiUrl: 'https://api.openai.com/v1/models/gpt-4-turbo',
+    apiKey: process.env.OPENAI_API_KEY
   },
   {
     id: 'gpt-3.5-turbo',
@@ -45,7 +49,9 @@ export const DEFAULT_MODELS: ModelConfig[] = [
     costPer1kOutput: 0.0015,
     maxTokens: 16385,
     supportsStreaming: true,
-    strengths: ['general queries', 'simple tasks', 'fast responses']
+    strengths: ['general queries', 'simple tasks', 'fast responses'],
+    apiUrl: 'https://api.openai.com/v1/models/gpt-3.5-turbo',
+    apiKey: process.env.OPENAI_API_KEY
   },
   {
     id: 'claude-3-sonnet',
@@ -56,7 +62,9 @@ export const DEFAULT_MODELS: ModelConfig[] = [
     costPer1kOutput: 0.015,
     maxTokens: 200000,
     supportsStreaming: true,
-    strengths: ['creative writing', 'analysis', 'safety']
+    strengths: ['creative writing', 'analysis', 'safety'],
+    apiUrl: 'https://api.anthropic.com/v1/models/claude-3-sonnet',
+    apiKey: process.env.ANTHROPIC_API_KEY
   },
   {
     id: 'claude-3-haiku',
@@ -67,7 +75,9 @@ export const DEFAULT_MODELS: ModelConfig[] = [
     costPer1kOutput: 0.00125,
     maxTokens: 200000,
     supportsStreaming: true,
-    strengths: ['simple tasks', 'fast responses', 'cost-effective']
+    strengths: ['simple tasks', 'fast responses', 'cost-effective'],
+    apiUrl: 'https://api.anthropic.com/v1/models/claude-3-haiku',
+    apiKey: process.env.ANTHROPIC_API_KEY
   },
   {
     id: 'gemini-pro',
@@ -78,7 +88,9 @@ export const DEFAULT_MODELS: ModelConfig[] = [
     costPer1kOutput: 0.0015,
     maxTokens: 32768,
     supportsStreaming: true,
-    strengths: ['multimodal', 'reasoning', 'code']
+    strengths: ['multimodal', 'reasoning', 'code'],
+    apiUrl: 'https://api.google.com/v1/models/gemini-pro',
+    apiKey: process.env.GOOGLE_API_KEY
   }
 ];
 

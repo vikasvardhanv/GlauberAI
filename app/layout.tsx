@@ -18,14 +18,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://glauber-ai.vercel.app'),
+  metadataBase: new URL('https://glauber.ai.'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'GlauberAI - Smart AI Routing for Every Query',
     description: 'Intelligent AI model routing platform that automatically selects the best foundation model for each query to optimize cost and performance.',
-    url: 'https://glauber-ai.vercel.app',
+    url: 'https://glauber.ai',
     siteName: 'GlauberAI',
     images: [
       {

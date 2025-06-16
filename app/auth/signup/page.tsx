@@ -37,13 +37,13 @@ export default function SignUpPage() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
+  
     if (!formData.agreeToTerms) {
       setError('Please agree to the Terms of Service and Privacy Policy');
       setIsLoading(false);
       return;
     }
-
+  
     try {
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
@@ -54,13 +54,22 @@ export default function SignUpPage() {
           }
         }
       });
-
+  
       if (error) {
         setError(error.message);
         return;
       }
-
+  
+      // Insert into profiles table
       if (data.user) {
+        await supabase.from('profiles').insert([
+          {
+            id: data.user.id,
+            email: formData.email,
+            full_name: formData.fullName,
+            plan: 'free',
+          }
+        ]);
         toast.success('Account created successfully!');
         router.push('/dashboard');
       }

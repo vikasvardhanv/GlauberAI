@@ -60,7 +60,7 @@ export default function DashboardPage() {
     );
   }
 
-  const usagePercentage = (usage.requests / usage.limit) * 100;
+  const usagePercentage = usage.limit > 0 ? (usage.requests / usage.limit) * 100 : 0;
   const isNearLimit = usagePercentage > 80;
 
   return (
@@ -153,7 +153,7 @@ export default function DashboardPage() {
                     <span>Requests used</span>
                     <span>{usage.requests}/{usage.limit}</span>
                   </div>
-                  <Progress value={usagePercentage} className="h-2" />
+                  <Progress value={usagePercentage} max={100} className="h-2" />
                 </div>
 
                 <div className="space-y-2 text-sm text-muted-foreground">

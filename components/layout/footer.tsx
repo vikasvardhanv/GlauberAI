@@ -10,6 +10,7 @@ import {
   Mail,
   ExternalLink
 } from 'lucide-react';
+import Image from 'next/image';
 
 export function Footer() {
   const footerSections = [
@@ -60,13 +61,20 @@ export function Footer() {
 
   return (
     <footer className="border-t bg-background/50 backdrop-blur-sm">
-      <div className="container py-16">
+      <div className="w-full px-4 max-w-7xl mx-auto py-16">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Brand and Newsletter */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center space-x-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Brain className="h-5 w-5 text-primary" />
+                 <Image
+                    src="/neural.png"
+                    alt="Neural Logo"
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                    priority
+                  />
               </div>
               <span className="font-bold text-xl">GlauberAI</span>
             </div>

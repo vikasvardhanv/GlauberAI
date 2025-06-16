@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
@@ -13,11 +14,10 @@ import {
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { 
-  Brain, 
-  Menu, 
-  Moon, 
-  Sun, 
+import {
+  Menu,
+  Moon,
+  Sun,
   Zap,
   BarChart3,
   FileText,
@@ -81,13 +81,19 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="w-full px-4 flex h-16 items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 glow-animation">
-              <Brain className="h-5 w-5 text-primary" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 glow-animation">
+              <Image
+                src="/neural.png"
+                alt="Neural Logo"
+                width={64}
+                height={64}
+                className="object-contain"
+                priority
+              />
             </div>
-            <span className="font-bold text-xl gradient-text-blue">GlauberAI</span>
           </Link>
 
           <NavigationMenu className="hidden md:flex">
@@ -164,7 +170,14 @@ export function Header() {
             <SheetContent side="right" className="w-80">
               <div className="flex flex-col space-y-6 mt-6">
                 <Link href="/" className="flex items-center space-x-2">
-                  <Brain className="h-6 w-6 text-primary" />
+                  <Image
+                    src="/neural.png"
+                    alt="Neural Logo"
+                    width={64}
+                    height={64}
+                    className="object-contain"
+                    priority
+                  />
                   <span className="font-bold text-lg">GlauberAI</span>
                 </Link>
                 
