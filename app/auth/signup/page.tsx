@@ -67,34 +67,6 @@ export default function SignUpPage() {
     }
   };
 
-  const handleSocialSignUp = async (provider: 'github' | 'google') => {
-    setIsLoading(true);
-    setError('');
-
-    if (!formData.agreeToTerms) {
-      setError('Please agree to the Terms of Service and Privacy Policy');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
-      });
-
-      if (error) {
-        setError(error.message);
-      }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-md space-y-6">
@@ -150,14 +122,14 @@ export default function SignUpPage() {
                   disabled={isLoading}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Create a strong password"
+                    placeholder="Create a password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
@@ -181,29 +153,23 @@ export default function SignUpPage() {
                 </div>
                 
                 {/* Password Requirements */}
-                {formData.password && (
-                  <div className="space-y-2 mt-3">
-                    <p className="text-xs text-muted-foreground">Password requirements:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {passwordRequirements.map((req, index) => (
-                        <div key={index} className="flex items-center space-x-2 text-xs">
-                          <div className={`w-3 h-3 rounded-full flex items-center justify-center ${
-                            req.test(formData.password) 
-                              ? 'bg-green-500' 
-                              : 'bg-muted border border-muted-foreground'
-                          }`}>
-                            {req.test(formData.password) && (
-                              <Check className="w-2 h-2 text-white" />
-                            )}
-                          </div>
-                          <span className={req.test(formData.password) ? 'text-green-600' : 'text-muted-foreground'}>
-                            {req.text}
-                          </span>
-                        </div>
-                      ))}
+                <div className="space-y-2">
+                  {passwordRequirements.map((requirement, index) => (
+                    <div key={index} className="flex items-center space-x-2 text-xs">
+                      <div className={`w-1 h-1 rounded-full ${
+                        requirement.test(formData.password) 
+                          ? 'bg-green-500' 
+                          : 'bg-gray-300'
+                      }`} />
+                      <span className={requirement.test(formData.password) 
+                        ? 'text-green-600' 
+                        : 'text-muted-foreground'
+                      }>
+                        {requirement.text}
+                      </span>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -242,38 +208,6 @@ export default function SignUpPage() {
                 )}
               </Button>
             </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                onClick={() => handleSocialSignUp('github')}
-                disabled={isLoading || !formData.agreeToTerms}
-                className="glass"
-              >
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleSocialSignUp('google')}
-                disabled={isLoading || !formData.agreeToTerms}
-                className="glass"
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Google
-              </Button>
-            </div>
           </CardContent>
         </Card>
 

@@ -50,28 +50,6 @@ export default function SignInPage() {
     }
   };
 
-  const handleSocialSignIn = async (provider: 'github' | 'google') => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
-      });
-
-      if (error) {
-        setError(error.message);
-      }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-md space-y-6">
@@ -168,38 +146,6 @@ export default function SignInPage() {
                 )}
               </Button>
             </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                onClick={() => handleSocialSignIn('github')}
-                disabled={isLoading}
-                className="glass"
-              >
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleSocialSignIn('google')}
-                disabled={isLoading}
-                className="glass"
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Google
-              </Button>
-            </div>
           </CardContent>
         </Card>
 
