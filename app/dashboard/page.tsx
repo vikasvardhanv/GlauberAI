@@ -13,7 +13,6 @@ import { UsageChart } from '@/components/dashboard/usage-chart';
 import { RecentQueries } from '@/components/dashboard/recent-queries';
 import { ModelPerformance } from '@/components/dashboard/model-performance';
 import { QuickActions } from '@/components/dashboard/quick-actions';
-import { supabase } from '@/lib/supabase';
 import { 
   Zap, 
   TrendingUp, 
@@ -37,18 +36,20 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!res.ok) {
+          router.push('/auth/signin');
+          return;
+        }
+        const { user } = await res.json();
+        setUser(user);
+      } catch {
         router.push('/auth/signin');
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      setUser(user);
-      // Load user usage data here
-      setLoading(false);
     }
-
     getUser();
   }, [router]);
 

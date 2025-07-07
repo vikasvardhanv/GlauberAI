@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,6 @@ import {
   Sun
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 interface DashboardLayoutProps {
@@ -44,6 +43,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [userLoading, setUserLoading] = useState(true);
 
   const navigation = [
     {
@@ -84,8 +85,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   ];
 
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const { user } = await res.json();
+          setUser(user);
+        }
+      } finally {
+        setUserLoading(false);
+      }
+    }
+    fetchUser();
+  }, []);
+
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await fetch('/api/auth/signout', { method: 'POST' });
     router.push('/');
   };
 
@@ -208,10 +224,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">John Doe</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          john@example.com
-                        </p>
+                        {userLoading ? (
+                          <div className="animate-pulse h-4 w-24 bg-muted rounded" />
+                        ) : user ? (
+                          <>
+                            <p className="text-sm font-medium leading-none">{user.fullName || user.email}</p>
+                            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                          </>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Not signed in</p>
+                        )}
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />

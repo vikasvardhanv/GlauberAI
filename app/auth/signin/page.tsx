@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Brain, Github, Mail, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export default function SignInPage() {
@@ -29,20 +28,21 @@ export default function SignInPage() {
     setError('');
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      const res = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
-
-      if (error) {
-        setError(error.message);
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Sign in failed.');
         return;
       }
-
-      if (data.user) {
-        toast.success('Welcome back!');
-        router.push('/dashboard');
-      }
+      toast.success('Welcome back!');
+      router.push('/dashboard');
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {

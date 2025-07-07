@@ -11,7 +11,6 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Brain, Github, Mail, Eye, EyeOff, AlertCircle, Check } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export default function SignUpPage() {
@@ -45,34 +44,22 @@ export default function SignUpPage() {
     }
   
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-          }
-        }
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+        }),
       });
-  
-      if (error) {
-        setError(error.message);
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Signup failed.');
         return;
       }
-  
-      // Insert into profiles table
-      if (data.user) {
-        await supabase.from('profiles').insert([
-          {
-            id: data.user.id,
-            email: formData.email,
-            full_name: formData.fullName,
-            plan: 'free',
-          }
-        ]);
-        toast.success('Account created successfully!');
-        router.push('/dashboard');
-      }
+      toast.success('Account created successfully!');
+      router.push('/dashboard');
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
