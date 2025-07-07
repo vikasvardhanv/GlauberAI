@@ -42,7 +42,7 @@ export default function SignInPage() {
         return;
       }
       toast.success('Welcome back!');
-      router.push('/dashboard');
+      window.location.href = '/dashboard/query';
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {

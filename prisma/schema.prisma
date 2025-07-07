@@ -7,10 +7,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserPlan {
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
   fullName  String?
+  plan      UserPlan @default(STARTER)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  requests  Request[]
+  billing   Billing[]
+  files     File[]
+}
+
+model File {
+  id          String   @id @default(uuid())
+  userId      String
+  requestId   String?
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  path        String   // File path in storage
+  url         String?  // Public URL if applicable
+  metadata    Json?    // Additional file metadata
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  request     Request? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+}
+
+model Request {
+  id        String   @id @default(uuid())
+  userId    String
+  query     String
+  model     String
+  tokens    Int
+  cost      Float    @default(0)
+  status    String   @default("completed") // completed, failed, pending
+  response  String?  // Store the AI response
+  fileCount Int      @default(0) // Number of files attached
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files     File[]
+}
+
+model Billing {
+  id        String   @id @default(uuid())
+  userId    String
+  plan      UserPlan
+  amount    Float
+  status    String   @default("pending") // pending, paid, failed, cancelled
+  period    String   // monthly, annual
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 } 

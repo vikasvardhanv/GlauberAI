@@ -3,11 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Zap, 
-  DollarSign, 
   BarChart3, 
   Clock,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Brain,
+  Target
 } from 'lucide-react';
 
 export function OverviewStats() {
@@ -21,20 +22,12 @@ export function OverviewStats() {
       description: "This month"
     },
     {
-      title: "Total Cost",
-      value: "$23.45",
-      change: "-8.2%",
-      trend: "down",
-      icon: DollarSign,
-      description: "This month"
-    },
-    {
-      title: "Avg Response Time",
-      value: "127ms",
-      change: "+2.1%",
+      title: "Models Used",
+      value: "8",
+      change: "+2",
       trend: "up",
-      icon: Clock,
-      description: "Last 24h"
+      icon: Brain,
+      description: "Different AI models"
     },
     {
       title: "Success Rate",
@@ -47,7 +40,7 @@ export function OverviewStats() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {stats.map((stat) => (
         <Card key={stat.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

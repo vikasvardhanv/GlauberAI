@@ -5,29 +5,31 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AIRouter } from "@/lib/ai-routing";
-
-const models = [
-  { id: "auto", name: "Auto (Recommended)" },
-  { id: "gpt-4-turbo", name: "GPT-4 Turbo" },
-  { id: "claude-3-sonnet", name: "Claude 3 Sonnet" },
-  { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
-  { id: "gemini-pro", name: "Gemini Pro" },
-];
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { Copy, Loader2, Send, Crown, AlertTriangle, Sparkles, Paperclip, X, Upload, FileText, Image as ImageIcon } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Progress } from "@/components/ui/progress";
+import Image from 'next/image';
 
 export default function QueryPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [selectedModel, setSelectedModel] = useState("auto");
+  const [files, setFiles] = useState<File[]>([]);
   const [result, setResult] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [usage, setUsage] = useState<any>(null);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showFileDialog, setShowFileDialog] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   useEffect(() => {
-    async function getUser() {
+    async function fetchUser() {
       try {
         const res = await fetch('/api/auth/me');
         if (!res.ok) {
@@ -36,36 +38,172 @@ export default function QueryPage() {
         }
         const { user } = await res.json();
         setUser(user);
+        
+        // Fetch usage data
+        const usageRes = await fetch('/api/usage');
+        if (usageRes.ok) {
+          const { usage } = await usageRes.json();
+          setUsage(usage);
+        }
       } catch {
         router.push('/auth/signin');
       } finally {
         setLoading(false);
       }
     }
-    getUser();
+    fetchUser();
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    if (!query.trim() && files.length === 0) {
+      setError("Please enter a query or attach a file");
+      return;
+    }
+    
     setIsSubmitting(true);
     setError("");
     setResult(null);
+    
     try {
-      // Use AIRouter to select the best model
-      const router = new AIRouter();
-      const routing = router.routeQuery(query, selectedModel);
-      // Simulate API call to the selected model (replace with real API call)
-      await new Promise((res) => setTimeout(res, 1500));
-      setResult({
-        model: routing.selectedModel.name,
-        reasoning: routing.reasoning,
-        estimatedCost: routing.estimatedCost,
-        response: `This is a mock response from ${routing.selectedModel.name} for: "${query}"`,
+      const formData = new FormData();
+      formData.append('query', query.trim() || 'Analyze attached files');
+      formData.append('selectedModel', 'auto');
+      
+      // Add files to form data
+      files.forEach((file, index) => {
+        formData.append('files', file);
       });
+      
+      console.log('Submitting with files:', files.map(f => f.name));
+      
+      const res = await fetch('/api/query', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        if (res.status === 429 && data.requiresUpgrade) {
+          setError(data.error);
+          setShowUpgradeDialog(true);
+          setUsage(data.usage);
+        } else {
+          setError(data.error || 'Failed to get response. Please try again.');
+        }
+        return;
+      }
+      
+      setResult({
+        model: data.model,
+        reasoning: data.reasoning,
+        response: data.response,
+        query: query.trim() || 'Analyze attached files',
+        timestamp: new Date().toLocaleTimeString(),
+      });
+      
+      setUsage(data.usage);
+      toast({ title: 'Success', description: 'Query processed successfully!' });
     } catch (err) {
+      console.error('Error submitting query:', err);
       setError("Failed to get response. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (result?.response) {
+      navigator.clipboard.writeText(result.response);
+      toast({ title: 'Copied!', description: 'Response copied to clipboard.' });
+    }
+  };
+
+  const handleClear = () => {
+    setQuery("");
+    setFiles([]);
+    setResult(null);
+    setError("");
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    processFiles(selectedFiles);
+    e.target.value = '';
+  };
+
+  const processFiles = (selectedFiles: File[]) => {
+    // Validate file types and sizes
+    const validFiles = selectedFiles.filter(file => {
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast({ 
+          title: 'File too large', 
+          description: `${file.name} is too large. Maximum size is 10MB.`,
+          variant: 'destructive'
+        });
+        return false;
+      }
+      return true;
+    });
+    
+    if (validFiles.length > 0) {
+      setFiles(prev => [...prev, ...validFiles]);
+      toast({ 
+        title: 'Files attached', 
+        description: `${validFiles.length} file(s) added successfully.` 
+      });
+      setShowFileDialog(false);
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      processFiles(droppedFiles);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      return <ImageIcon className="h-4 w-4 text-pink-500" />;
+    }
+    return <FileText className="h-4 w-4 text-blue-500" />;
+  };
+
+  const triggerFileInput = () => {
+    const fileInput = document.getElementById('file-upload-dialog') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
     }
   };
 
@@ -78,55 +216,339 @@ export default function QueryPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>Submit a Query</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Your Prompt</label>
-              <Textarea
-                placeholder="Enter your prompt here..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                rows={4}
-                className="resize-none"
-                required
-                disabled={isSubmitting}
+    <DashboardLayout>
+      <div className="max-w-4xl mx-auto py-10 px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <Image 
+                src="/neural.png" 
+                alt="Neural Logo" 
+                width={32} 
+                height={32} 
+                className="object-contain"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Model Preference</label>
-              <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isSubmitting}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {models.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      {model.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <h1 className="text-3xl font-bold">AI Query Platform</h1>
+          </div>
+          <p className="text-muted-foreground text-lg">
+            Enter your prompt and let our AI choose the best model for you
+          </p>
+        </div>
+
+        {/* Usage Alert */}
+        {usage && usage.usagePercentage > 80 && (
+          <Alert className="mb-6 border-orange-200 bg-orange-50/50 dark:border-orange-800 dark:bg-orange-950/50">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800 dark:text-orange-200">
+              You've used {usage.currentUsage} of {usage.planLimit} requests this month. 
+              {usage.remainingRequests > 0 ? ` ${usage.remainingRequests} requests remaining.` : ' Please upgrade your plan to continue.'}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Usage Progress */}
+        {usage && (
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Monthly Usage</span>
+                <span className="text-sm text-muted-foreground">
+                  {usage.currentUsage} / {usage.planLimit} requests
+                </span>
+              </div>
+              <Progress value={usage.usagePercentage} className="h-2" />
+              <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                <span>{usage.plan.name} Plan</span>
+                <span>{usage.remainingRequests > 0 ? `${usage.remainingRequests} remaining` : 'Limit reached'}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Query Form */}
+        <Card className="shadow-lg border-primary/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              Enter Your Prompt
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <Textarea
+                  placeholder="Describe what you need... (text, code, images, analysis, etc.)"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  rows={6}
+                  className="resize-none bg-muted/50 border-2 border-accent focus:border-primary transition text-lg"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* File Upload */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={isSubmitting}
+                    onClick={() => setShowFileDialog(true)}
+                  >
+                    <Paperclip className="h-4 w-4 mr-2" />
+                    Attach Files
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Support for images, documents, and more (max 10MB each)
+                  </span>
+                </div>
+                
+                {/* File List */}
+                {files.length > 0 && (
+                  <div className="space-y-2">
+                    {files.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                        <div className="flex items-center gap-3">
+                          {getFileIcon(file)}
+                          <div>
+                            <span className="text-sm font-medium">{file.name}</span>
+                            <div className="text-xs text-muted-foreground">
+                              {formatFileSize(file.size)} • {file.type || 'Unknown type'}
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          disabled={isSubmitting}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex gap-3">
+                <Button 
+                  type="submit" 
+                  className="flex-1 h-12 text-lg" 
+                  disabled={isSubmitting || (!query.trim() && files.length === 0)}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-5 w-5 mr-2" />
+                      Send Query
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleClear} 
+                  disabled={isSubmitting || (!query.trim() && files.length === 0)} 
+                  className="px-6"
+                >
+                  Clear
+                </Button>
+              </div>
+            </form>
+
+            {error && (
+              <Alert className="mt-6 border-red-200 bg-red-50/50">
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            {result && (
+              <div className="mt-8 space-y-4">
+                {/* Model Info */}
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="default" className="text-sm">{result.model}</Badge>
+                    <span className="text-sm text-muted-foreground">Smart routing selected this model</span>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={handleCopy}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* File Processing Info */}
+                {result.filesProcessed > 0 && (
+                  <Card className="border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/50">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="h-2 w-2 bg-green-500 rounded-full" />
+                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                          Files Processed Successfully
+                        </span>
+                      </div>
+                      <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                        <p>• {result.filesProcessed} file(s) analyzed</p>
+                        {result.hasImages && <p>• Image analysis enabled</p>}
+                        {result.hasDocuments && <p>• Document processing enabled</p>}
+                        {result.fileTypes && result.fileTypes.length > 0 && (
+                          <p>• File types: {result.fileTypes.join(', ')}</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Model Details */}
+                <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/50">
+                  <CardContent className="pt-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Model Reasoning</span>
+                        {result.confidence && (
+                          <Badge variant="outline" className="text-xs">
+                            {Math.round(result.confidence * 100)}% confidence
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        {result.reasoning}
+                      </p>
+                      {result.estimatedCost && (
+                        <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
+                          <span>Estimated cost:</span>
+                          <span className="font-medium">${result.estimatedCost.toFixed(4)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Response */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="whitespace-pre-line text-base leading-relaxed">{result.response}</div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* File Upload Dialog */}
+        <Dialog open={showFileDialog} onOpenChange={setShowFileDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Attach Files
+              </DialogTitle>
+              <DialogDescription>
+                Upload files to include with your query. Supported formats: images, PDFs, documents, and more.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {/* Drag & Drop Area */}
+              <div
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                  dragActive 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-muted-foreground/25 hover:border-primary/50'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={triggerFileInput}
+              >
+                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg font-medium mb-2">Drop files here</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  or click to browse files
+                </p>
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="file-upload-dialog"
+                  accept="image/*,.pdf,.txt,.doc,.docx,.csv,.json"
+                />
+                <Button variant="outline" className="cursor-pointer">
+                  Choose Files
+                </Button>
+              </div>
+
+              {/* File Requirements */}
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>• Maximum file size: 10MB per file</p>
+                <p>• Supported formats: Images, PDFs, Documents, Text files</p>
+                <p>• You can upload multiple files at once</p>
+              </div>
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting || !query.trim()}>
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>
-          </form>
-          {error && <div className="text-red-600 mt-4">{error}</div>}
-          {result && (
-            <div className="mt-8 p-4 border rounded-lg bg-muted">
-              <div className="mb-2 text-xs text-muted-foreground">Model: <span className="font-semibold">{result.model}</span></div>
-              <div className="mb-2 text-xs text-muted-foreground">Reasoning: {result.reasoning}</div>
-              <div className="mb-2 text-xs text-muted-foreground">Estimated Cost: ${result.estimatedCost?.toFixed(4)}</div>
-              <div className="mt-4 whitespace-pre-line">{result.response}</div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Dialog */}
+        <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-yellow-500" />
+                Upgrade Your Plan
+              </DialogTitle>
+              <DialogDescription>
+                You've reached your monthly limit. Upgrade to continue using GlauberAI.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Professional</CardTitle>
+                    <div className="text-2xl font-bold">$29<span className="text-sm font-normal text-muted-foreground">/month</span></div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li>• 50,000 requests/month</li>
+                      <li>• All AI models</li>
+                      <li>• Advanced routing</li>
+                      <li>• Priority support</li>
+                    </ul>
+                    <Button className="w-full mt-4">Upgrade to Professional</Button>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Enterprise</CardTitle>
+                    <div className="text-2xl font-bold">$299<span className="text-sm font-normal text-muted-foreground">/month</span></div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li>• Unlimited requests</li>
+                      <li>• Custom AI models</li>
+                      <li>• Dedicated support</li>
+                      <li>• SLA guarantee</li>
+                    </ul>
+                    <Button className="w-full mt-4">Upgrade to Enterprise</Button>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </DashboardLayout>
   );
 } 

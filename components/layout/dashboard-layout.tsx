@@ -16,8 +16,6 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Brain,
-  LayoutDashboard,
   MessageSquare,
   BarChart3,
   Key,
@@ -29,10 +27,13 @@ import {
   HelpCircle,
   Bell,
   Moon,
-  Sun
+  Sun,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -45,14 +46,26 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userLoading, setUserLoading] = useState(true);
+  const [notifications] = useState([
+    {
+      id: 1,
+      title: 'New feature available',
+      message: 'Advanced analytics dashboard is now live',
+      time: '2 minutes ago',
+      read: false,
+      type: 'info'
+    },
+    {
+      id: 2,
+      title: 'Usage alert',
+      message: 'You\'ve used 80% of your monthly requests',
+      time: '1 hour ago',
+      read: false,
+      type: 'warning'
+    }
+  ]);
 
   const navigation = [
-    {
-      name: 'Overview',
-      href: '/dashboard',
-      icon: LayoutDashboard,
-      current: pathname === '/dashboard'
-    },
     {
       name: 'Query Interface',
       href: '/dashboard/query',
@@ -70,18 +83,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       href: '/dashboard/api',
       icon: Key,
       current: pathname === '/dashboard/api'
-    },
-    {
-      name: 'Billing',
-      href: '/dashboard/billing',
-      icon: CreditCard,
-      current: pathname === '/dashboard/billing'
-    },
-    {
-      name: 'Settings',
-      href: '/dashboard/settings',
-      icon: Settings,
-      current: pathname === '/dashboard/settings'
     }
   ];
 
@@ -131,11 +132,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r bg-background px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/dashboard/query" className="flex items-center space-x-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Brain className="h-5 w-5 text-primary" />
+                <Image 
+                  src="/neural.png" 
+                  alt="Neural Logo" 
+                  width={32} 
+                  height={32} 
+                  className="object-contain"
+                />
               </div>
-              <span className="font-bold text-xl gradient-text-blue">GlauberAI</span>
+              <span className="font-bold text-xl">GlauberAI</span>
             </Link>
           </div>
           
@@ -169,8 +176,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <SheetContent side="left" className="w-72 p-0">
           <div className="flex flex-col h-full">
             <div className="flex h-16 items-center px-6 border-b">
-              <Link href="/" className="flex items-center space-x-2">
-                <Brain className="h-6 w-6 text-primary" />
+              <Link href="/dashboard/query" className="flex items-center space-x-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  <Image 
+                    src="/neural.png" 
+                    alt="Neural Logo" 
+                    width={32} 
+                    height={32} 
+                    className="object-contain"
+                  />
+                </div>
                 <span className="font-bold text-lg">GlauberAI</span>
               </Link>
             </div>
@@ -205,12 +220,60 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                 </Button>
 
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-4 w-4" />
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-xs text-white">2</span>
-                  </div>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative">
+                      <Bell className="h-4 w-4" />
+                      {notifications.filter(n => !n.read).length > 0 && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                          <span className="text-xs text-white">{notifications.filter(n => !n.read).length}</span>
+                        </div>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-80" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex items-center justify-between">
+                        <span>Notifications</span>
+                        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs">
+                          Mark all read
+                        </Button>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-muted-foreground">
+                        No notifications
+                      </div>
+                    ) : (
+                      <div className="max-h-64 overflow-y-auto">
+                        {notifications.map((notification) => (
+                          <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3 space-y-1">
+                            <div className="flex items-center space-x-2 w-full">
+                              {notification.type === 'warning' ? (
+                                <AlertCircle className="h-4 w-4 text-orange-500" />
+                              ) : (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{notification.title}</p>
+                                <p className="text-xs text-muted-foreground truncate">{notification.message}</p>
+                                <p className="text-xs text-muted-foreground">{notification.time}</p>
+                              </div>
+                              {!notification.read && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                              )}
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                      </div>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-center">
+                      View all notifications
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -238,7 +301,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/settings" className="flex items-center space-x-2">
+                      <Link href="/dashboard/profile" className="flex items-center space-x-2">
                         <User className="h-4 w-4" />
                         <span>Profile</span>
                       </Link>
@@ -250,7 +313,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/support" className="flex items-center space-x-2">
+                      <Link href="/dashboard/support" className="flex items-center space-x-2">
                         <HelpCircle className="h-4 w-4" />
                         <span>Support</span>
                       </Link>

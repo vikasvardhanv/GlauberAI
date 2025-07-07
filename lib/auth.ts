@@ -1,7 +1,7 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+const JWT_SECRET = process.env.JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET || '';
 const COOKIE_NAME = 'glauberai_token';
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -11,14 +11,21 @@ const COOKIE_OPTIONS = {
   maxAge: 60 * 60 * 24 * 7, // 7 days
 };
 
-export function signJwt(payload: object): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+const encoder = new TextEncoder();
+
+export async function signJwt(payload: object): Promise<string> {
+  return await new SignJWT(payload as any)
+    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .setIssuedAt()
+    .setExpirationTime('7d')
+    .sign(encoder.encode(JWT_SECRET));
 }
 
-export function verifyJwt(token: string): JwtPayload | string | null {
+export async function verifyJwt(token: string): Promise<any | null> {
   try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch {
+    const { payload } = await jwtVerify(token, encoder.encode(JWT_SECRET));
+    return payload;
+  } catch (err) {
     return null;
   }
 }

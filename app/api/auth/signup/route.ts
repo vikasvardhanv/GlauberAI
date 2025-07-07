@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     data: { email, password: hashed, fullName },
   });
   // Set JWT cookie
-  const token = signJwt({ id: user.id, email: user.email, fullName: user.fullName });
+  const token = await signJwt({ id: user.id, email: user.email, fullName: user.fullName });
   setAuthCookie(token);
   return NextResponse.json({ id: user.id, email: user.email, fullName: user.fullName });
 }
