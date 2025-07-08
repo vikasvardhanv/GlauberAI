@@ -1,4 +1,5 @@
 import { ModelConfig } from './ai-routing';
+import { Buffer } from 'buffer';
 
 export interface AIResponse {
   content: string;
@@ -93,26 +94,34 @@ export class AIIntegration {
       }
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: model.modelId,
-        messages,
-        max_tokens: Math.min(model.maxTokens, 4000),
-        temperature: 0.7,
-      }),
-    });
+    let response;
+    try {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: model.modelId,
+          messages,
+          max_tokens: Math.min(model.maxTokens, 4000),
+          temperature: 0.7,
+        }),
+      });
+    } catch (err) {
+      console.error('Network error calling OpenAI:', err);
+      throw new Error('Network error calling OpenAI');
+    }
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
       throw new Error(`OpenAI API error: ${response.statusText}`);
     }
 
     const data = await response.json();
-    const content = data.choices[0]?.message?.content || '';
+    const content = data.choices?.[0]?.message?.content || '';
     const tokens = data.usage?.total_tokens || 0;
     const cost = this.calculateCost(model, tokens);
 
@@ -421,19 +430,20 @@ export class AIIntegration {
   // Utility method to convert files to base64
   async filesToBase64(files: File[]): Promise<FileData[]> {
     const fileData: FileData[] = [];
-    
     for (const file of files) {
-      const arrayBuffer = await file.arrayBuffer();
-      const base64 = Buffer.from(arrayBuffer).toString('base64');
-      
-      fileData.push({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        data: base64
-      });
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const base64 = Buffer.from(arrayBuffer).toString('base64');
+        fileData.push({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          data: base64
+        });
+      } catch (err) {
+        console.error('Error converting file to base64:', file.name, err);
+      }
     }
-    
     return fileData;
   }
 }

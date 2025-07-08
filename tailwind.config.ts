@@ -3,20 +3,28 @@ import type { Config } from 'tailwindcss';
 const config: Config = {
   darkMode: ['class'],
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
+  prefix: '',
   theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
     extend: {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'gradient-futuristic': 'linear-gradient(135deg, #00ffff 0%, #ff00ff 50%, #ffff00 100%)',
-        'gradient-cyan': 'linear-gradient(135deg, #00ffff 0%, #0080ff 100%)',
-        'gradient-pink': 'linear-gradient(135deg, #ff00ff 0%, #ff0080 100%)',
-        'gradient-neon': 'linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff)',
+        'gradient-primary': 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+        'gradient-secondary': 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+        'gradient-accent': 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -24,16 +32,11 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
-        },
-        popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
-        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
@@ -41,6 +44,10 @@ const config: Config = {
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
@@ -50,26 +57,20 @@ const config: Config = {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
         },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
         },
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',
           '3': 'hsl(var(--chart-3))',
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
-        },
-        neon: {
-          cyan: '#00ffff',
-          pink: '#ff00ff',
-          yellow: '#ffff00',
-          purple: '#8000ff',
-          red: '#ff0000',
         },
       },
       keyframes: {
@@ -89,93 +90,81 @@ const config: Config = {
             height: '0',
           },
         },
-        'float': {
-          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
-          '33%': { transform: 'translateY(-15px) rotate(1deg)' },
-          '66%': { transform: 'translateY(-8px) rotate(-1deg)' },
+        'fade-in': {
+          from: {
+            opacity: '0',
+            transform: 'translateY(10px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
         },
-        'glow': {
+        'slide-in': {
+          from: {
+            opacity: '0',
+            transform: 'translateX(-20px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateX(0)',
+          },
+        },
+        'scale-in': {
+          from: {
+            opacity: '0',
+            transform: 'scale(0.95)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'scale(1)',
+          },
+        },
+        'subtle-glow': {
           '0%, 100%': {
-            boxShadow: '0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.1)',
+            boxShadow: '0 0 0 rgba(59, 130, 246, 0)',
           },
           '50%': {
-            boxShadow: '0 0 30px rgba(0, 255, 255, 0.6), 0 0 60px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.2)',
+            boxShadow: '0 0 20px rgba(59, 130, 246, 0.1)',
           },
         },
-        'pulse-glow': {
-          '0%, 100%': {
-            boxShadow: '0 0 20px rgba(255, 0, 255, 0.3), 0 0 40px rgba(255, 0, 255, 0.1)',
-          },
-          '50%': {
-            boxShadow: '0 0 30px rgba(255, 0, 255, 0.6), 0 0 60px rgba(255, 0, 255, 0.2)',
-          },
-        },
-        'shimmer': {
+        shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
-        'morph': {
-          '0%, 100%': { borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%' },
-          '50%': { borderRadius: '30% 60% 70% 40% / 50% 60% 30% 60%' },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         },
-        'slide-in': {
-          '0%': { transform: 'translateX(-100%)', opacity: '0' },
-          '100%': { transform: 'translateX(0)', opacity: '1' },
-        },
-        'fade-up': {
-          '0%': { transform: 'translateY(30px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        'scale-in': {
-          '0%': { transform: 'scale(0.8)', opacity: '0' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
-        },
-        'rotate-glow': {
-          '0%': { 
-            transform: 'rotate(0deg)',
-            boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)',
-          },
-          '100%': { 
-            transform: 'rotate(360deg)',
-            boxShadow: '0 0 20px rgba(255, 0, 255, 0.5)',
-          },
-        },
-        'neon-flicker': {
+        pulse: {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.8' },
-        },
-        'matrix-rain': {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100vh)' },
+          '50%': { opacity: '0.7' },
         },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'float': 'float 8s ease-in-out infinite',
-        'glow': 'glow 3s ease-in-out infinite',
-        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-        'shimmer': 'shimmer 2s infinite',
-        'morph': 'morph 8s ease-in-out infinite',
-        'slide-in': 'slide-in 0.6s ease-out',
-        'fade-up': 'fade-up 0.8s ease-out',
-        'scale-in': 'scale-in 0.5s ease-out',
-        'rotate-glow': 'rotate-glow 4s linear infinite',
-        'neon-flicker': 'neon-flicker 0.5s ease-in-out infinite',
-        'matrix-rain': 'matrix-rain 3s linear infinite',
+        'fade-in': 'fade-in 0.6s ease-out',
+        'slide-in': 'slide-in 0.4s ease-out',
+        'scale-in': 'scale-in 0.3s ease-out',
+        'subtle-glow': 'subtle-glow 3s ease-in-out infinite',
+        shimmer: 'shimmer 2s ease-in-out infinite',
+        spin: 'spin 1s linear infinite',
+        pulse: 'pulse 1.5s ease-in-out infinite',
       },
       backdropBlur: {
         xs: '2px',
       },
       boxShadow: {
-        'neon-cyan': '0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.2)',
-        'neon-pink': '0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.2)',
-        'neon-yellow': '0 0 20px rgba(255, 255, 0, 0.5), 0 0 40px rgba(255, 255, 0, 0.2)',
-        'glass': '0 8px 32px rgba(0, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-        'glass-pink': '0 8px 32px rgba(255, 0, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        'soft': '0 4px 20px rgba(0, 0, 0, 0.08)',
+        'medium': '0 8px 30px rgba(0, 0, 0, 0.12)',
+        'strong': '0 12px 40px rgba(0, 0, 0, 0.15)',
+        'glow': '0 0 20px rgba(59, 130, 246, 0.2)',
+        'glow-strong': '0 0 40px rgba(59, 130, 246, 0.3)',
       },
     },
   },
   plugins: [require('tailwindcss-animate')],
-};
+} satisfies Config;
+
 export default config;

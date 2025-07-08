@@ -19,32 +19,11 @@ import {
 export default function AboutPage() {
   const team = [
     {
-      name: "Alex Chen",
-      role: "CEO & Co-founder",
-      bio: "Former AI researcher at Google. PhD in Machine Learning from Stanford.",
-      avatar: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2",
-      initials: "AC"
-    },
-    {
-      name: "Sarah Rodriguez",
-      role: "CTO & Co-founder",
-      bio: "Ex-OpenAI engineer. Built large-scale AI systems at Meta and Microsoft.",
-      avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2",
-      initials: "SR"
-    },
-    {
-      name: "Marcus Kim",
-      role: "Head of Engineering",
-      bio: "Former tech lead at Anthropic. Expert in distributed systems and AI infrastructure.",
-      avatar: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2",
-      initials: "MK"
-    },
-    {
-      name: "Emily Watson",
-      role: "Head of Product",
-      bio: "Product leader with 10+ years at Stripe and Notion. Focused on developer experience.",
-      avatar: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2",
-      initials: "EW"
+      name: "Vikash V.",
+      role: "Founder & CEO",
+      bio: "Building GlauberAI to make AI accessible, intelligent, and affordable for everyone.",
+      avatar: "https://avatars.githubusercontent.com/u/10229899?v=4",
+      initials: "VV"
     }
   ];
 

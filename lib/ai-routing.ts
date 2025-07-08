@@ -354,6 +354,17 @@ export const COMPREHENSIVE_MODELS: ModelConfig[] = [
 ];
 
 export const SOPHISTICATED_ROUTING_RULES: RoutingRule[] = [
+  // Explicit OpenAI/ChatGPT keyword rule
+  {
+    id: 'openai-keyword',
+    name: 'OpenAI/ChatGPT Keyword',
+    conditions: {
+      keywords: ['openai', 'chatgpt', 'gpt', 'gpt-4', 'gpt-3.5'],
+    },
+    targetModel: 'gpt-4o',
+    priority: 100,
+    confidence: 1.0
+  },
   // Image Generation Rules
   {
     id: 'image-generation-artistic',

@@ -32,20 +32,30 @@ export async function POST(req: NextRequest) {
     // Get user and check usage
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      include: {
-        requests: {
-          where: {
-            createdAt: {
-              gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) // This month
-            }
-          }
-        }
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        fullName: true,
+        plan: true,
+        createdAt: true,
+        updatedAt: true,
       }
     });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    // Count requests for this month
+    const currentUsage = await prisma.request.count({
+      where: {
+        userId: user.id,
+        createdAt: {
+          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        }
+      }
+    });
 
     // Calculate usage based on plan
     const planLimits: Record<string, number> = {
@@ -54,7 +64,6 @@ export async function POST(req: NextRequest) {
       ENTERPRISE: -1 // Unlimited
     };
 
-    const currentUsage = user.requests.length;
     const planLimit = planLimits[user.plan] || 10;
     const isUnlimited = user.plan === 'ENTERPRISE';
     const usagePercentage = isUnlimited ? 0 : (currentUsage / planLimit) * 100;

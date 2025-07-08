@@ -248,21 +248,90 @@ export default function QueryPage() {
           </Alert>
         )}
 
-        {/* Usage Progress */}
+        {/* Plan Information and Usage */}
         {usage && (
           <Card className="mb-6">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Monthly Usage</span>
-                <span className="text-sm text-muted-foreground">
-                  {usage.currentUsage} / {usage.planLimit} requests
-                </span>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Crown className="h-5 w-5 text-yellow-600" />
+                  <div>
+                    <h3 className="font-semibold text-lg">{usage.plan.name} Plan</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {usage.plan.name === 'STARTER' && 'Perfect for getting started with AI'}
+                      {usage.plan.name === 'PROFESSIONAL' && 'Advanced features for power users'}
+                      {usage.plan.name === 'ENTERPRISE' && 'Unlimited access for enterprise needs'}
+                    </p>
+                  </div>
+                </div>
+                {usage.plan.name !== 'ENTERPRISE' && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => router.push('/dashboard/billing')}
+                    className="border-primary text-primary hover:bg-primary hover:text-white"
+                  >
+                    Upgrade Plan
+                  </Button>
+                )}
               </div>
-              <Progress value={usage.usagePercentage} className="h-2" />
-              <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                <span>{usage.plan.name} Plan</span>
-                <span>{usage.remainingRequests > 0 ? `${usage.remainingRequests} remaining` : 'Limit reached'}</span>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Monthly Usage</span>
+                  <span className="text-sm text-muted-foreground">
+                    {usage.currentUsage} / {usage.planLimit} requests
+                  </span>
+                </div>
+                <Progress value={usage.usagePercentage} className="h-2" />
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{usage.remainingRequests > 0 ? `${usage.remainingRequests} remaining` : 'Limit reached'}</span>
+                  <span>{usage.usagePercentage.toFixed(1)}% used</span>
+                </div>
               </div>
+
+              {/* Upgrade Suggestions */}
+              {usage.usagePercentage > 70 && usage.plan.name === 'STARTER' && (
+                <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-blue-900 dark:text-blue-100">Ready to upgrade?</h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                        You're approaching your limit. Upgrade to Professional for 50,000 requests/month and advanced features.
+                      </p>
+                      <Button 
+                        size="sm" 
+                        className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => router.push('/dashboard/billing')}
+                      >
+                        Upgrade Now
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {usage.usagePercentage > 80 && usage.plan.name === 'PROFESSIONAL' && (
+                <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/50 dark:to-pink-950/50 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-start gap-3">
+                    <Crown className="h-5 w-5 text-purple-600 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-purple-900 dark:text-purple-100">Need unlimited access?</h4>
+                      <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
+                        You're using a lot of requests. Consider Enterprise for unlimited requests and priority support.
+                      </p>
+                      <Button 
+                        size="sm" 
+                        className="mt-2 bg-purple-600 hover:bg-purple-700 text-white"
+                        onClick={() => router.push('/dashboard/billing')}
+                      >
+                        Contact Sales
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
