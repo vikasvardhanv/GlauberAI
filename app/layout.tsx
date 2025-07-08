@@ -64,14 +64,35 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-pattern`}>
+        {/* Futuristic Background Elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          {/* Animated Grid */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/20 via-transparent to-neon-pink/20 animate-float"></div>
+            <div className="absolute inset-0 bg-gradient-to-tl from-neon-yellow/10 via-transparent to-neon-cyan/20 animate-float" style={{ animationDelay: '2s' }}></div>
+          </div>
+          
+          {/* Floating Particles */}
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-neon-cyan rounded-full animate-float opacity-60"></div>
+          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-neon-pink rounded-full animate-float opacity-80" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-neon-yellow rounded-full animate-float opacity-70" style={{ animationDelay: '3s' }}></div>
+          <div className="absolute top-2/3 right-1/4 w-1 h-1 bg-neon-cyan rounded-full animate-float opacity-50" style={{ animationDelay: '4s' }}></div>
+          
+          {/* Glowing Orbs */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-radial from-neon-cyan/5 to-transparent rounded-full animate-pulse-glow"></div>
+          <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-gradient-radial from-neon-pink/5 to-transparent rounded-full animate-glow" style={{ animationDelay: '1s' }}></div>
+        </div>
+        
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className="relative z-10">
+            {children}
+          </div>
           <Toaster />
         </ThemeProvider>
       </body>
