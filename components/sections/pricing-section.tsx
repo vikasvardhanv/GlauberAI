@@ -102,23 +102,23 @@ export function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="py-24 bg-gradient-to-b from-muted/20 to-background">
+    <section id="pricing" className="py-16 md:py-24 bg-gradient-to-b from-muted/20 to-background">
       <div className="container">
-        <div className="text-center space-y-4 mb-16">
-          <Badge variant="outline" className="px-4 py-2">
+        <div className="text-center space-y-4 mb-12 md:mb-16">
+          <Badge variant="outline" className="px-3 py-1">
             Pricing
           </Badge>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold">
             Simple, transparent
-            <span className="block gradient-text">pricing for everyone</span>
+            <span className="block gradient-text-natural">pricing for everyone</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Start free, scale as you grow. No hidden fees, no surprises.
           </p>
         </div>
 
         {/* Billing Toggle */}
-        <div className="flex items-center justify-center space-x-4 mb-12">
+        <div className="flex items-center justify-center space-x-3 md:space-x-4 mb-8 md:mb-12">
           <span className={`text-sm font-medium ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
             Monthly
           </span>
@@ -130,52 +130,52 @@ export function PricingSection() {
           <span className={`text-sm font-medium ${isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
             Annual
           </span>
-          <Badge variant="secondary" className="ml-2">
+          <Badge variant="secondary" className="ml-2 text-xs">
             Save up to 17%
           </Badge>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => (
-            <Card key={plan.name} className={`relative overflow-hidden ${
+            <Card key={plan.name} className={`relative overflow-hidden texture-paper ${
               plan.popular 
-                ? 'border-primary shadow-lg shadow-primary/20 scale-105' 
-                : 'glass'
+                ? 'border-primary shadow-medium scale-105' 
+                : ''
             }`}>
               {plan.popular && (
-                <div className="absolute top-0 right-6">
-                  <div className="bg-primary text-primary-foreground px-4 py-1 text-xs font-medium rounded-b-lg">
+                <div className="absolute top-0 right-4 md:right-6">
+                  <div className="bg-primary text-primary-foreground px-3 md:px-4 py-1 text-xs font-medium rounded-b-lg">
                     Most Popular
                   </div>
                 </div>
               )}
 
-              <CardHeader className="text-center pb-4">
-                <div className="flex justify-center mb-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              <CardHeader className="text-center pb-3 md:pb-4">
+                <div className="flex justify-center mb-3 md:mb-4">
+                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center ${
                     plan.popular 
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-primary/10 text-primary'
                   }`}>
-                    <plan.icon className="w-6 h-6" />
+                    <plan.icon className="w-5 h-5 md:w-6 md:h-6" />
                   </div>
                 </div>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription className="text-base">
+                <CardTitle className="text-xl md:text-2xl">{plan.name}</CardTitle>
+                <CardDescription className="text-sm md:text-base">
                   {plan.description}
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 md:space-y-6">
                 {/* Pricing */}
                 <div className="text-center">
                   <div className="flex items-center justify-center space-x-2">
-                    <span className="text-4xl font-bold">
+                    <span className="text-3xl md:text-4xl font-bold">
                       {formatPrice(plan.price)}
                     </span>
                     {plan.price.monthly > 0 && (
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground text-sm md:text-base">
                         /{isAnnual ? 'mo' : 'month'}
                       </span>
                     )}
@@ -183,7 +183,7 @@ export function PricingSection() {
                   
                   {isAnnual && plan.price.monthly > 0 && (
                     <div className="mt-1">
-                      <span className="text-sm text-muted-foreground line-through">
+                      <span className="text-xs md:text-sm text-muted-foreground line-through">
                         ${plan.price.monthly}/mo
                       </span>
                       <Badge variant="secondary" className="ml-2 text-xs">
@@ -192,19 +192,19 @@ export function PricingSection() {
                     </div>
                   )}
                   
-                  <div className="text-sm text-muted-foreground mt-2">
+                  <div className="text-xs md:text-sm text-muted-foreground mt-2">
                     {plan.requests} requests included
                   </div>
                 </div>
 
                 {/* Features */}
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 w-5 h-5 bg-green-500/10 rounded-full flex items-center justify-center mt-0.5">
-                        <Check className="w-3 h-3 text-green-500" />
+                    <div key={index} className="flex items-start space-x-2 md:space-x-3">
+                      <div className="flex-shrink-0 w-4 h-4 md:w-5 md:h-5 bg-green-500/10 rounded-full flex items-center justify-center mt-0.5">
+                        <Check className="w-2.5 h-2.5 md:w-3 md:h-3 text-green-500" />
                       </div>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs md:text-sm text-muted-foreground">
                         {feature}
                       </span>
                     </div>
@@ -212,7 +212,7 @@ export function PricingSection() {
                 </div>
               </CardContent>
 
-              <CardFooter className="pt-6">
+              <CardFooter className="pt-4 md:pt-6">
                 <Button 
                   className={`w-full ${plan.popular ? '' : 'variant-outline'}`}
                   variant={plan.popular ? 'default' : 'outline'}
@@ -229,17 +229,17 @@ export function PricingSection() {
         </div>
 
         {/* Enterprise Contact */}
-        <div className="text-center mt-16">
-          <Card className="max-w-2xl mx-auto glass">
-            <CardContent className="p-8">
-              <div className="space-y-4">
-                <Crown className="w-12 h-12 text-primary mx-auto" />
-                <h3 className="text-2xl font-bold">Need something custom?</h3>
-                <p className="text-muted-foreground">
+        <div className="text-center mt-12 md:mt-16">
+          <Card className="max-w-2xl mx-auto texture-noise">
+            <CardContent className="p-6 md:p-8">
+              <div className="space-y-3 md:space-y-4">
+                <Crown className="w-10 h-10 md:w-12 md:h-12 text-primary mx-auto" />
+                <h3 className="text-xl md:text-2xl font-bold">Need something custom?</h3>
+                <p className="text-muted-foreground text-sm md:text-base">
                   We offer custom plans for large enterprises with specific requirements.
                   Contact our sales team to discuss your needs.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                   <Button variant="outline" asChild>
                     <Link href="/contact">Contact Sales</Link>
                   </Button>
@@ -250,21 +250,6 @@ export function PricingSection() {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* FAQ */}
-        <div className="text-center mt-16">
-          <p className="text-muted-foreground">
-            Have questions? Check our{' '}
-            <Link href="/faq" className="text-primary hover:underline">
-              FAQ
-            </Link>{' '}
-            or{' '}
-            <Link href="/contact" className="text-primary hover:underline">
-              contact support
-            </Link>
-            .
-          </p>
         </div>
       </div>
     </section>

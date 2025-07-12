@@ -4,11 +4,14 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
-  title: 'GlauberAI - Intelligent AI Platform',
-  description: 'Advanced AI platform with intelligent routing and analytics',
+  title: 'GlauberAI - Smart AI Routing',
+  description: 'Intelligent AI routing platform that picks the best model for your needs',
   keywords: ['AI', 'Machine Learning', 'API', 'Routing', 'GPT', 'Claude', 'Gemini'],
   authors: [{ name: 'GlauberAI Team' }],
   creator: 'GlauberAI',
@@ -18,13 +21,13 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://glauber.ai.'),
+  metadataBase: new URL('https://glauber.ai'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'GlauberAI - Smart AI Routing for Every Query',
-    description: 'Intelligent AI model routing platform that automatically selects the best foundation model for each query to optimize cost and performance.',
+    title: 'GlauberAI - Smart AI Routing',
+    description: 'Intelligent AI routing platform that automatically selects the best foundation model for each query.',
     url: 'https://glauber.ai',
     siteName: 'GlauberAI',
     images: [
@@ -40,8 +43,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GlauberAI - Smart AI Routing for Every Query',
-    description: 'Intelligent AI model routing platform that automatically selects the best foundation model for each query to optimize cost and performance.',
+    title: 'GlauberAI - Smart AI Routing',
+    description: 'Intelligent AI routing platform that automatically selects the best foundation model for each query.',
     images: ['/og-image.png'],
   },
   robots: {
@@ -64,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} text-natural`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
